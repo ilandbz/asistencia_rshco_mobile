@@ -1,0 +1,57 @@
+name: asistencia_rshco_mobile
+description: "Aplicación móvil oficial de la Red de Salud Huánuco (RSHCO) para gestión de asistencia, turnos y permisos del personal de salud."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # --- State Management & Dependency Injection ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # --- Routing & Navigation ---
+  go_router: ^14.2.7
+
+  # --- Networking & HTTP ---
+  dio: ^5.7.0
+  pretty_dio_logger: ^1.4.0
+
+  # --- Secure Storage & Local Cache ---
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.3.2
+
+  # --- Forms, Validation & Utilities ---
+  intl: 0.20.3
+  equatable: ^2.0.5
+
+  # --- Media, Files & Camera ---
+  image_picker: ^1.1.2
+  file_picker: ^13.4.1
+
+  # --- UI, Feedback & Icons ---
+  lucide_icons: ^0.257.0
+  google_fonts: ^6.2.1
+  flutter_spinkit: ^5.2.1
+  quickalert: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  riverpod_generator: ^2.4.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
