@@ -41,8 +41,14 @@ class Personal extends Equatable {
   final String apellidoMaterno;
   final String? cargo;
   final String? establecimiento;
+  final String? microred;
   final String? condicionLaboral;
   final String? regimen;
+  final String? tipoTrabajador;
+  final String? servicio;
+  final String? direccion;
+  final String? celular;
+  final String? email;
 
   const Personal({
     required this.id,
@@ -52,8 +58,14 @@ class Personal extends Equatable {
     required this.apellidoMaterno,
     this.cargo,
     this.establecimiento,
+    this.microred,
     this.condicionLaboral,
     this.regimen,
+    this.tipoTrabajador,
+    this.servicio,
+    this.direccion,
+    this.celular,
+    this.email,
   });
 
   String get nombreCompleto => '$nombres $apellidoPaterno $apellidoMaterno'.trim();
@@ -93,8 +105,7 @@ class Personal extends Equatable {
     } else {
       cond = map['condicion_laboral']?.toString() ??
           map['condicion']?.toString() ??
-          map['modalidad']?.toString() ??
-          map['tipo_trabajador']?.toString();
+          map['modalidad']?.toString();
     }
 
     // Extraer régimen
@@ -106,6 +117,28 @@ class Personal extends Equatable {
           map['regimen_laboral']?.toString() ??
           map['tipo_regimen']?.toString();
     }
+
+    // Extraer microred
+    String? mic;
+    if (map['microred'] is Map) {
+      mic = map['microred']['nombre']?.toString() ?? map['microred']['descripcion']?.toString();
+    } else {
+      mic = map['microred']?.toString() ?? map['nombre_microred']?.toString();
+    }
+
+    // Extraer servicio
+    String? serv;
+    if (map['servicio'] is Map) {
+      serv = map['servicio']['nombre']?.toString();
+    } else {
+      serv = map['servicio']?.toString() ?? map['area']?.toString();
+    }
+
+    // Tipo trabajador y contacto
+    final String? tipoTrab = map['tipo_trabajador']?.toString();
+    final String? dir = map['direccion']?.toString();
+    final String? cel = map['celular']?.toString() ?? map['telefono']?.toString();
+    final String? mail = map['email']?.toString() ?? map['correo']?.toString() ?? json['email']?.toString();
 
     // Nombres y apellidos
     final String nom = map['nombres']?.toString() ?? map['nombre']?.toString() ?? '';
@@ -120,8 +153,14 @@ class Personal extends Equatable {
       apellidoMaterno: mat,
       cargo: car,
       establecimiento: est,
+      microred: mic,
       condicionLaboral: cond,
       regimen: reg,
+      tipoTrabajador: tipoTrab,
+      servicio: serv,
+      direccion: dir,
+      celular: cel,
+      email: mail,
     );
   }
 
@@ -133,8 +172,14 @@ class Personal extends Equatable {
         'apellido_materno': apellidoMaterno,
         'cargo': cargo,
         'establecimiento': establecimiento,
+        'microred': microred,
         'condicion_laboral': condicionLaboral,
         'regimen': regimen,
+        'tipo_trabajador': tipoTrabajador,
+        'servicio': servicio,
+        'direccion': direccion,
+        'celular': celular,
+        'email': email,
       };
 
   @override
@@ -146,8 +191,14 @@ class Personal extends Equatable {
         apellidoMaterno,
         cargo,
         establecimiento,
+        microred,
         condicionLaboral,
         regimen,
+        tipoTrabajador,
+        servicio,
+        direccion,
+        celular,
+        email,
       ];
 }
 

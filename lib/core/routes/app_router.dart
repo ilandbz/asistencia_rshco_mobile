@@ -9,6 +9,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/cambio_turno/presentation/screens/mis_cambios_turno_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/perfil/presentation/screens/perfil_screen.dart';
 import '../../features/permisos/presentation/screens/mis_permisos_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -64,6 +65,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/permisos',
         builder: (context, state) => const MisPermisosScreen(),
+      ),
+      GoRoute(
+        path: '/perfil',
+        builder: (context, state) => const PerfilScreen(),
       ),
     ],
   );

@@ -21,6 +21,9 @@ abstract class PermisosRepository {
     required String motivo,
     String? cittNumero,
     String? filePath,
+    String? detalleLicencia,
+    String? colegiaturaMedico,
+    String? diagnostico,
   });
 }
 
@@ -72,6 +75,10 @@ class PermisosRepositoryImpl implements PermisosRepository {
     final response = await dioClient.post(
       ApiEndpoints.ocrEscanear,
       data: formData,
+      options: Options(
+        sendTimeout: const Duration(seconds: 90),
+        receiveTimeout: const Duration(seconds: 90),
+      ),
     );
     final data = response.data is Map<String, dynamic> ? response.data : {};
     return OcrCitScanResult.fromJson(data);
@@ -85,16 +92,35 @@ class PermisosRepositoryImpl implements PermisosRepository {
     required String motivo,
     String? cittNumero,
     String? filePath,
+    String? detalleLicencia,
+    String? colegiaturaMedico,
+    String? diagnostico,
   }) async {
     final map = <String, dynamic>{
       'tipo_permiso_id': tipoPermisoId,
+      'fecha_desde': fechaInicio,
+      'fecha_hasta': fechaFin,
       'fecha_inicio': fechaInicio,
       'fecha_fin': fechaFin,
       'motivo': motivo,
     };
 
+    if (detalleLicencia != null && detalleLicencia.isNotEmpty) {
+      map['detalle_licencia'] = detalleLicencia;
+    }
+
+    if (colegiaturaMedico != null && colegiaturaMedico.isNotEmpty) {
+      map['colegiatura_medico'] = colegiaturaMedico;
+      map['cmp'] = colegiaturaMedico;
+    }
+
     if (cittNumero != null && cittNumero.isNotEmpty) {
+      map['numero_certificado'] = cittNumero;
       map['citt_numero'] = cittNumero;
+    }
+
+    if (diagnostico != null && diagnostico.isNotEmpty) {
+      map['diagnostico'] = diagnostico;
     }
 
     if (filePath != null && filePath.isNotEmpty) {

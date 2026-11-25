@@ -101,6 +101,7 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(formCambioTurnoControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -117,18 +118,27 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.infoBg,
+                  color: isDark ? const Color(0xFF0C4A6E).withOpacity(0.35) : AppColors.infoBg,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.info.withOpacity(0.3)),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF0284C7) : AppColors.info.withOpacity(0.3),
+                  ),
                 ),
                 child: Row(
-                  children: const [
-                    Icon(Icons.info_outline_rounded, color: AppColors.info, size: 22),
-                    SizedBox(width: 10),
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: isDark ? const Color(0xFF38BDF8) : AppColors.info,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Los cambios deben solicitarse antes de la fecha programada. La solicitud nace en estado SOLICITADO sujeta a visto bueno de jefatura y RRHH.',
-                        style: TextStyle(fontSize: 12, color: AppColors.primaryDark),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? const Color(0xFFBAE6FD) : AppColors.primaryDark,
+                        ),
                       ),
                     ),
                   ],
@@ -137,22 +147,31 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
               const SizedBox(height: 20),
 
               // Paso 1: Seleccionar Turno Propio
-              const Text(
+              Text(
                 '1. Mi Turno a Permutar',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getTextPrimary(context),
+                ),
               ),
               const SizedBox(height: 8),
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppColors.border),
+                  side: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : AppColors.border,
+                  ),
                 ),
-                tileColor: Colors.white,
-                leading: const Icon(Icons.calendar_today_rounded, color: AppColors.primary),
+                tileColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                leading: Icon(
+                  Icons.calendar_today_rounded,
+                  color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                ),
                 title: Text(
                   _miFecha != null ? _dateFormat.format(_miFecha!) : 'Seleccionar fecha de mi turno',
                   style: TextStyle(
-                    color: _miFecha != null ? AppColors.textPrimary : AppColors.textMuted,
+                    color: _miFecha != null ? AppColors.getTextPrimary(context) : AppColors.getTextMuted(context),
                     fontWeight: _miFecha != null ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -162,9 +181,13 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
               const SizedBox(height: 20),
 
               // Paso 2: Buscar Colega por DNI
-              const Text(
+              Text(
                 '2. Colega de Reemplazo (Mismo Servicio)',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getTextPrimary(context),
+                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -237,24 +260,35 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
               const SizedBox(height: 20),
 
               // Paso 3: Turno del Colega
-              const Text(
+              Text(
                 '3. Fecha y Turno a Cubrir del Colega',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getTextPrimary(context),
+                ),
               ),
               const SizedBox(height: 8),
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppColors.border),
+                  side: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : AppColors.border,
+                  ),
                 ),
-                tileColor: Colors.white,
-                leading: const Icon(Icons.event_available_rounded, color: AppColors.turnoGuardia),
+                tileColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                leading: Icon(
+                  Icons.event_available_rounded,
+                  color: isDark ? const Color(0xFFA78BFA) : AppColors.turnoGuardia,
+                ),
                 title: Text(
                   _colegaFecha != null
                       ? '${_dateFormat.format(_colegaFecha!)} (Turno: ${formState.colegaTurnoSigla ?? "Consultando..."})'
                       : 'Seleccionar fecha del colega',
                   style: TextStyle(
-                    color: _colegaFecha != null ? AppColors.textPrimary : AppColors.textMuted,
+                    color: _colegaFecha != null
+                        ? AppColors.getTextPrimary(context)
+                        : AppColors.getTextMuted(context),
                     fontWeight: _colegaFecha != null ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -264,9 +298,13 @@ class _SolicitarCambioTurnoScreenState extends ConsumerState<SolicitarCambioTurn
               const SizedBox(height: 20),
 
               // Paso 4: Motivo
-              const Text(
+              Text(
                 '4. Sustento / Motivo de la Permuta',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getTextPrimary(context),
+                ),
               ),
               const SizedBox(height: 8),
               TextFormField(
