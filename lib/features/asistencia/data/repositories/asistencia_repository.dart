@@ -59,7 +59,12 @@ class AsistenciaRepositoryImpl implements AsistenciaRepository {
     final data = response.data;
     List list = [];
     if (data is Map<String, dynamic>) {
-      list = data['registros'] ?? data['asistencias'] ?? data['historial'] ?? data['data'] ?? [];
+      list = data['detalle_dias'] ??
+          data['registros'] ??
+          data['asistencias'] ??
+          data['historial'] ??
+          data['data'] ??
+          [];
     } else if (data is List) {
       list = data;
     }
