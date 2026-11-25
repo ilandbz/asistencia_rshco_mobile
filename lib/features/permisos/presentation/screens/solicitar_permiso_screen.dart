@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/permisos_controller.dart';
+import '../widgets/camara_certificado_screen.dart';
 
 class SolicitarPermisoScreen extends ConsumerStatefulWidget {
   const SolicitarPermisoScreen({super.key});
@@ -151,16 +152,14 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
 
   Future<void> _tomarFoto({bool dispararOcr = false}) async {
     try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.rear,
-        maxWidth: 1600,
-        maxHeight: 1600,
-        imageQuality: 85,
-        requestFullMetadata: false,
+      final XFile? photo = await Navigator.push<XFile?>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const CamaraCertificadoScreen(),
+        ),
       );
 
-      if (photo != null) {
+      if (photo != null && mounted) {
         setState(() => _archivoAdjunto = File(photo.path));
         ref.read(formPermisoControllerProvider.notifier).setFilePath(photo.path);
 
@@ -413,44 +412,60 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          preferredSize: const Size.fromHeight(44),
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            height: 36,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF0F172A) : Colors.white.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               border: isDark ? Border.all(color: const Color(0xFF334155)) : null,
             ),
             child: TabBar(
               controller: _tabController,
+              dividerColor: Colors.transparent,
               indicator: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 border: isDark
                     ? Border.all(color: const Color(0xFF38BDF8).withOpacity(0.4))
                     : null,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
               unselectedLabelColor:
-                  isDark ? const Color(0xFF94A3B8) : Colors.white.withOpacity(0.85),
+                  isDark ? const Color(0xFF94A3B8) : Colors.white.withOpacity(0.88),
               labelStyle:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               tabs: const [
                 Tab(
-                  icon: Icon(Icons.description_rounded, size: 18),
-                  text: 'Registro Manual',
+                  height: 34,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.description_rounded, size: 15),
+                      SizedBox(width: 6),
+                      Text('Registro Manual'),
+                    ],
+                  ),
                 ),
                 Tab(
-                  icon: Icon(Icons.document_scanner_rounded, size: 18),
-                  text: 'Escanear',
+                  height: 34,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.document_scanner_rounded, size: 15),
+                      SizedBox(width: 6),
+                      Text('Escanear'),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -478,15 +493,15 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
     final labelColor = isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. Selector de Tipo de Certificado (Radio Cards)
+            // 1. Selector de Tipo de Certificado (3 columnas equilibradas)
             _buildTipoCertificadoSelector(formState),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // 2. Número de Certificado
             Text(
@@ -500,6 +515,9 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
             TextFormField(
               controller: _nroCertificadoController,
               decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                 hintText: 'Ej. A-12345678',
                 prefixIcon: Icon(Icons.badge_outlined,
                     color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
@@ -512,7 +530,7 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // 3. Colegiatura Médica (CMP)
             Text(
@@ -527,12 +545,15 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
               controller: _cmpController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                 hintText: 'Ej. 094296',
                 prefixIcon: Icon(Icons.medical_services_outlined,
                     color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // 4. Fechas (Desde y Hasta)
             Row(
@@ -544,15 +565,17 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Fecha de Inicio (Desde)',
+                          Text('Inicio (Desde)',
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                  fontSize: 12.5,
                                   color: labelColor)),
-                          Text('Primer día',
+                          Text('1er día',
                               style: TextStyle(
-                                  fontSize: 10,
-                                  color: isDark ? const Color(0xFF38BDF8) : AppColors.accent)),
+                                  fontSize: 10.5,
+                                  color: isDark
+                                      ? const Color(0xFF38BDF8)
+                                      : AppColors.accent)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -561,12 +584,14 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 14),
+                              horizontal: 12, vertical: 13),
                           decoration: BoxDecoration(
                             color: isDark ? const Color(0xFF1E293B) : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : AppColors.border),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : AppColors.border),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -578,8 +603,12 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _fechaInicio != null
-                                      ? (isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary)
-                                      : (isDark ? const Color(0xFF94A3B8) : AppColors.textMuted),
+                                      ? (isDark
+                                          ? const Color(0xFFF8FAFC)
+                                          : AppColors.textPrimary)
+                                      : (isDark
+                                          ? const Color(0xFF94A3B8)
+                                          : AppColors.textMuted),
                                   fontWeight: _fechaInicio != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -587,7 +616,9 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                               ),
                               Icon(Icons.calendar_today_rounded,
                                   size: 16,
-                                  color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
+                                  color: isDark
+                                      ? const Color(0xFF38BDF8)
+                                      : AppColors.primary),
                             ],
                           ),
                         ),
@@ -595,7 +626,7 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,15 +634,17 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Fecha de Fin (Hasta)',
+                          Text('Fin (Hasta)',
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                  fontSize: 12.5,
                                   color: labelColor)),
                           Text('Último día',
                               style: TextStyle(
-                                  fontSize: 10,
-                                  color: isDark ? const Color(0xFF38BDF8) : AppColors.accent)),
+                                  fontSize: 10.5,
+                                  color: isDark
+                                      ? const Color(0xFF38BDF8)
+                                      : AppColors.accent)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -620,12 +653,14 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 14),
+                              horizontal: 12, vertical: 13),
                           decoration: BoxDecoration(
                             color: isDark ? const Color(0xFF1E293B) : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : AppColors.border),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : AppColors.border),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -637,8 +672,12 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: _fechaFin != null
-                                      ? (isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary)
-                                      : (isDark ? const Color(0xFF94A3B8) : AppColors.textMuted),
+                                      ? (isDark
+                                          ? const Color(0xFFF8FAFC)
+                                          : AppColors.textPrimary)
+                                      : (isDark
+                                          ? const Color(0xFF94A3B8)
+                                          : AppColors.textMuted),
                                   fontWeight: _fechaFin != null
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -646,7 +685,9 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                               ),
                               Icon(Icons.calendar_today_rounded,
                                   size: 16,
-                                  color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
+                                  color: isDark
+                                      ? const Color(0xFF38BDF8)
+                                      : AppColors.primary),
                             ],
                           ),
                         ),
@@ -656,40 +697,52 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // 5. Días de Descanso Otorgados (Cálculo Automático)
-            Text(
-              'Días de Descanso Otorgados',
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: labelColor),
-            ),
-            const SizedBox(height: 6),
+            // 5. Días de Descanso Otorgados
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : AppColors.surfaceVariant.withOpacity(0.6),
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : AppColors.surfaceVariant.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                     color: isDark ? const Color(0xFF334155) : AppColors.border),
               ),
-              child: Text(
-                _diasOtorgados > 0
-                    ? '$_diasOtorgados día(s) de descanso'
-                    : 'Esperando fechas...',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight:
-                      _diasOtorgados > 0 ? FontWeight.bold : FontWeight.normal,
-                  color: _diasOtorgados > 0
-                      ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
-                      : (isDark ? const Color(0xFF94A3B8) : AppColors.textMuted),
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Días de Descanso Otorgados:',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: labelColor,
+                    ),
+                  ),
+                  Text(
+                    _diasOtorgados > 0
+                        ? '$_diasOtorgados día(s)'
+                        : 'Esperando fechas...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: _diasOtorgados > 0
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: _diasOtorgados > 0
+                          ? (isDark
+                              ? const Color(0xFF38BDF8)
+                              : AppColors.primary)
+                          : (isDark
+                              ? const Color(0xFF94A3B8)
+                              : AppColors.textMuted),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // 6. Diagnóstico / Código CIE-10
             Text(
@@ -703,12 +756,15 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
             TextFormField(
               controller: _diagnosticoController,
               decoration: InputDecoration(
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                 hintText: 'Ej. Contusión en zona lumbosacro (S30.0)',
                 prefixIcon: Icon(Icons.healing_rounded,
                     color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // 7. Evidencia del Descanso (Obligatorio)
             Row(
@@ -735,18 +791,25 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
-                          color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
-                      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          color: isDark
+                              ? const Color(0xFF38BDF8)
+                              : AppColors.primary),
+                      backgroundColor:
+                          isDark ? const Color(0xFF1E293B) : Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
                     icon: Icon(Icons.camera_alt_rounded,
                         size: 18,
-                        color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
+                        color: isDark
+                            ? const Color(0xFF38BDF8)
+                            : AppColors.primary),
                     label: Text('Tomar Foto',
                         style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? const Color(0xFF38BDF8) : AppColors.primary)),
+                            fontSize: 12.5,
+                            color: isDark
+                                ? const Color(0xFF38BDF8)
+                                : AppColors.primary)),
                     onPressed: () => _tomarFoto(dispararOcr: false),
                   ),
                 ),
@@ -756,18 +819,25 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(
-                          color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
-                      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          color: isDark
+                              ? const Color(0xFF38BDF8)
+                              : AppColors.primary),
+                      backgroundColor:
+                          isDark ? const Color(0xFF1E293B) : Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
                     icon: Icon(Icons.upload_file_rounded,
                         size: 18,
-                        color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
+                        color: isDark
+                            ? const Color(0xFF38BDF8)
+                            : AppColors.primary),
                     label: Text('Subir Archivo / PDF',
                         style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? const Color(0xFF38BDF8) : AppColors.primary)),
+                            fontSize: 12.5,
+                            color: isDark
+                                ? const Color(0xFF38BDF8)
+                                : AppColors.primary)),
                     onPressed: _seleccionarArchivoPdf,
                   ),
                 ),
@@ -778,40 +848,48 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
               const SizedBox(height: 10),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF064E3B).withOpacity(0.3) : AppColors.successBg,
+                  color: isDark
+                      ? const Color(0xFF064E3B).withOpacity(0.3)
+                      : AppColors.successBg,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: isDark ? const Color(0xFF059669) : AppColors.success.withOpacity(0.4)),
+                      color: isDark
+                          ? const Color(0xFF059669)
+                          : AppColors.success.withOpacity(0.4)),
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.check_circle_rounded,
-                        color: AppColors.success, size: 20),
-                    const SizedBox(width: 10),
+                        color: AppColors.success, size: 18),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _archivoAdjunto!.path.split(RegExp(r'[/\\]')).last,
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFF34D399) : AppColors.success),
+                            color: isDark
+                                ? const Color(0xFF34D399)
+                                : AppColors.success),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close_rounded,
+                    InkWell(
+                      onTap: () => setState(() => _archivoAdjunto = null),
+                      child: Icon(Icons.close_rounded,
                           size: 18,
-                          color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
-                      onPressed: () => setState(() => _archivoAdjunto = null),
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
             ],
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // Botones Cancelar y Registrar Licencia
             Row(
@@ -821,7 +899,10 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                     onPressed: () => Navigator.pop(context),
                     child: Text('Cancelar',
                         style: TextStyle(
-                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary)),
+                            fontSize: 14,
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : AppColors.textSecondary)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -829,7 +910,8 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
                   flex: 2,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? const Color(0xFF0284C7) : AppColors.primary,
+                      backgroundColor:
+                          isDark ? const Color(0xFF0284C7) : AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -856,29 +938,35 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
     );
   }
 
-  // Selector de Tarjetas de Tipo de Certificado (CITT EsSalud, Particular, MINSA)
+  // Selector compacto en fila de Tipo de Certificado (CITT EsSalud, Particular, MINSA)
   Widget _buildTipoCertificadoSelector(FormPermisoState formState) {
-    return Column(
+    return Row(
       children: [
-        _buildRadioOptionCard(
-          codigo: 'CITT',
-          titulo: 'CITT EsSalud',
-          subtitulo: 'Descanso médico institucional',
-          seleccionado: formState.tipoCertificado == 'CITT',
+        Expanded(
+          child: _buildRadioOptionCard(
+            codigo: 'CITT',
+            titulo: 'CITT EsSalud',
+            subtitulo: 'Institucional',
+            seleccionado: formState.tipoCertificado == 'CITT',
+          ),
         ),
-        const SizedBox(height: 8),
-        _buildRadioOptionCard(
-          codigo: 'PARTICULAR',
-          titulo: 'Particular (CMP)',
-          subtitulo: 'Especie valorada o clínica',
-          seleccionado: formState.tipoCertificado == 'PARTICULAR',
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildRadioOptionCard(
+            codigo: 'PARTICULAR',
+            titulo: 'Particular',
+            subtitulo: 'CMP / Clínica',
+            seleccionado: formState.tipoCertificado == 'PARTICULAR',
+          ),
         ),
-        const SizedBox(height: 8),
-        _buildRadioOptionCard(
-          codigo: 'MINSA',
-          titulo: 'MINSA (Ley Nº 30012)',
-          subtitulo: 'Familiar grave o terminal',
-          seleccionado: formState.tipoCertificado == 'MINSA',
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildRadioOptionCard(
+            codigo: 'MINSA',
+            titulo: 'MINSA',
+            subtitulo: 'Ley N° 30012',
+            seleccionado: formState.tipoCertificado == 'MINSA',
+          ),
         ),
       ],
     );
@@ -899,54 +987,48 @@ class _SolicitarPermisoScreenState extends ConsumerState<SolicitarPermisoScreen>
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
         decoration: BoxDecoration(
           color: seleccionado
-              ? (isDark ? const Color(0xFF0284C7).withOpacity(0.15) : AppColors.primary.withOpacity(0.04))
+              ? (isDark
+                  ? const Color(0xFF0284C7).withOpacity(0.18)
+                  : AppColors.primary.withOpacity(0.06))
               : (isDark ? const Color(0xFF1E293B) : Colors.white),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: seleccionado
                 ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
                 : (isDark ? const Color(0xFF334155) : AppColors.border),
-            width: seleccionado ? 2 : 1,
+            width: seleccionado ? 1.8 : 1,
           ),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              seleccionado
-                  ? Icons.radio_button_checked_rounded
-                  : Icons.radio_button_off_rounded,
-              color: seleccionado
-                  ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
-                  : (isDark ? const Color(0xFF64748B) : AppColors.textMuted),
-              size: 20,
+            Text(
+              titulo,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.5,
+                color: seleccionado
+                    ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
+                    : (isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary),
+              ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    titulo,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: seleccionado
-                          ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
-                          : (isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitulo,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              subtitulo,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.5,
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : AppColors.textSecondary,
               ),
             ),
           ],

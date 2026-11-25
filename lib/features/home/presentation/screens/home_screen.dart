@@ -51,15 +51,15 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. Banner de Bienvenida y Perfil (Asimétrico: puntas en A y D, redondeado en B y C)
+            // 1. Banner de Bienvenida y Perfil (Asimétrico: borde leve en A y D, redondeado amplio en B y C)
             Container(
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : const Color(0xFF2B6CB0),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.zero,
+                  topLeft: Radius.circular(8),
                   topRight: Radius.circular(28),
                   bottomLeft: Radius.circular(28),
-                  bottomRight: Radius.zero,
+                  bottomRight: Radius.circular(8),
                 ),
                 border: Border.all(
                   color: isDark ? const Color(0xFF334155) : Colors.transparent,
@@ -69,10 +69,10 @@ class HomeScreen extends ConsumerWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.zero,
+                    topLeft: Radius.circular(8),
                     topRight: Radius.circular(28),
                     bottomLeft: Radius.circular(28),
-                    bottomRight: Radius.zero,
+                    bottomRight: Radius.circular(8),
                   ),
                   onTap: () => context.push('/perfil'),
                   child: Padding(
@@ -85,7 +85,7 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             CircleAvatar(
                               radius: 28,
-                              backgroundColor: Colors.white.withOpacity(0.2),
+                              backgroundColor: Colors.white.withOpacity(0.24),
                               child: const Icon(
                                 Icons.person_rounded,
                                 size: 32,
@@ -97,24 +97,34 @@ class HomeScreen extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '$saludo, $primerNombre',
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 0.2,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          '$saludo, $primerNombre',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      const _AnimatedGreetingWave(),
+                                    ],
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 3),
                                   Text(
                                     nombreCompleto,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      color: Colors.white.withOpacity(0.9),
-                                      fontWeight: FontWeight.w500,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   if (personal?.cargo != null) ...[
@@ -125,8 +135,10 @@ class HomeScreen extends ConsumerWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 11.5,
-                                        color: isDark ? const Color(0xFF38BDF8) : const Color(0xFFBAE6FD),
-                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? const Color(0xFF38BDF8)
+                                            : const Color(0xFFFEF08A),
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ],
@@ -136,7 +148,7 @@ class HomeScreen extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.18),
+                                color: Colors.white.withOpacity(0.22),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -153,7 +165,7 @@ class HomeScreen extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.15),
+                            color: Colors.black.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -162,14 +174,18 @@ class HomeScreen extends ConsumerWidget {
                               Expanded(
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.business_rounded, size: 14, color: Colors.white70),
+                                    const Icon(Icons.business_rounded, size: 14, color: Colors.white),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         personal?.establecimiento ?? 'Sede Red de Salud Huánuco',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 11, color: Colors.white70),
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -179,7 +195,7 @@ class HomeScreen extends ConsumerWidget {
                               const Text(
                                 'Ver Perfil →',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -348,7 +364,7 @@ class HomeScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.getTextPrimary(context),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                     height: 1.15,
                   ),
                 ),
@@ -362,7 +378,8 @@ class HomeScreen extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.getTextSecondary(context),
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                     height: 1.15,
                   ),
                 ),
@@ -370,6 +387,55 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AnimatedGreetingWave extends StatefulWidget {
+  const _AnimatedGreetingWave();
+
+  @override
+  State<_AnimatedGreetingWave> createState() => _AnimatedGreetingWaveState();
+}
+
+class _AnimatedGreetingWaveState extends State<_AnimatedGreetingWave>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _angle;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    )..repeat(reverse: true);
+    _angle = Tween<double>(begin: -0.18, end: 0.24).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _angle,
+      builder: (context, child) {
+        return Transform.rotate(
+          angle: _angle.value,
+          alignment: const Alignment(0.5, 0.7),
+          child: child,
+        );
+      },
+      child: const Text(
+        '👋',
+        style: TextStyle(fontSize: 20),
       ),
     );
   }
