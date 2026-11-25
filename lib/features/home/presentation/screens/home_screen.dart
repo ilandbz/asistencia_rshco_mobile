@@ -7,45 +7,48 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  String _obtenerSaludo() {
+    final hora = DateTime.now().hour;
+    if (hora >= 5 && hora < 12) {
+      return '¡Buenos días';
+    } else if (hora >= 12 && hora < 19) {
+      return '¡Buenas tardes';
+    } else {
+      return '¡Buenas noches';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authControllerProvider);
     final personal = authState.personal;
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    final String primerNombre = personal?.nombres.split(' ').first ?? 'Personal';
+    final String nombreCompleto = personal?.nombreCompleto.isNotEmpty == true
+        ? personal!.nombreCompleto
+        : 'Personal de Salud';
+    final String saludo = _obtenerSaludo();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Red de Salud Huánuco'),
         actions: [
+          // Botón de Modo Día y Noche
           IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Cerrar Sesión',
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Cerrar Sesión'),
-                  content: const Text('¿Está seguro de que desea salir de la aplicación?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Cerrar Sesión'),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                await ref.read(authControllerProvider.notifier).logout();
-                if (context.mounted) {
-                  context.go('/login');
-                }
-              }
-            },
+            icon: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: isDark ? Colors.amberAccent : Colors.white,
+            ),
+            tooltip: isDark ? 'Cambiar a modo Día' : 'Cambiar a modo Noche',
+            onPressed: () => ref.read(themeModeProvider.notifier).toggleTheme(),
+          ),
+          // Botón de Perfil
+          IconButton(
+            icon: const Icon(Icons.account_circle_rounded),
+            tooltip: 'Mi Perfil',
+            onPressed: () => context.push('/perfil'),
           ),
         ],
       ),
@@ -54,57 +57,137 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Tarjeta de Identificación del Trabajador
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Column(
-                  children: [
-                    Row(
+            // 1. Tarjeta Cálida de Bienvenida y Perfil (Interactiva)
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                      : [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => context.push('/perfil'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: AppColors.primaryLight.withOpacity(0.15),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            size: 36,
-                            color: AppColors.primary,
-                          ),
+                        // Saludo y Avatar
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Colors.white.withOpacity(0.2),
+                              child: const Icon(
+                                Icons.person_rounded,
+                                size: 32,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$saludo, $primerNombre',
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    nombreCompleto,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (personal?.cargo != null) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      personal!.cargo!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: isDark ? const Color(0xFF38BDF8) : const Color(0xFFBAE6FD),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.18),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 14),
+
+                        // Barra inferior con Sede y link a perfil
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                personal?.nombreCompleto.isNotEmpty == true
-                                    ? personal!.nombreCompleto
-                                    : 'Personal de Salud',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.business_rounded, size: 14, color: Colors.white70),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        personal?.establecimiento ?? 'Sede Red de Salud Huánuco',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 11, color: Colors.white70),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              if (personal?.dni != null && personal!.dni.isNotEmpty) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  'DNI: ${personal.dni}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textMuted,
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 4),
-                              Text(
-                                personal?.cargo ?? 'Cargo no asignado',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primary,
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Ver Perfil →',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
@@ -112,56 +195,19 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const Divider(height: 20),
-                    // Metadatos: Establecimiento, Condición Laboral y Régimen
-                    Row(
-                      children: [
-                        const Icon(Icons.business_rounded, size: 14, color: AppColors.accent),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            personal?.establecimiento ?? 'Red de Salud Huánuco',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.badge_outlined, size: 14, color: AppColors.turnoGuardia),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'Condición: ${personal?.condicionLaboral ?? "Nombrado / Contratado"}'
-                            '${personal?.regimen != null ? " (${personal!.regimen})" : ""}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 20),
 
             // Accesos Directos a Módulos
-            const Text(
+            Text(
               'Módulos y Servicios',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.getTextPrimary(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -241,18 +287,18 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: AppColors.getTextPrimary(context),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: AppColors.getTextSecondary(context),
                         height: 1.3,
                       ),
                     ),

@@ -97,10 +97,13 @@ class MarcacionHoy extends Equatable {
 class TurnoDiaRol extends Equatable {
   final int dia;
   final String fecha;
-  final String sigla; // M, T, N, D, GD, GN, L, VAC
+  final String sigla; // MT, M, T, N, D, GD, GN, L, VAC, F
   final String? descripcion;
   final String? horario;
+  final String? nombreDia;
+  final int totalHoras;
   final bool esGuardia;
+  final bool programado;
 
   const TurnoDiaRol({
     required this.dia,
@@ -108,24 +111,52 @@ class TurnoDiaRol extends Equatable {
     required this.sigla,
     this.descripcion,
     this.horario,
+    this.nombreDia,
+    this.totalHoras = 0,
     this.esGuardia = false,
+    this.programado = true,
   });
 
   factory TurnoDiaRol.fromJson(Map<String, dynamic> json) {
+    // Si no está programado o no tiene abreviatura, es descanso (D)
+    String sig = json['abreviatura']?.toString() ??
+        json['sigla']?.toString() ??
+        json['turno']?.toString() ??
+        '';
+    if (sig.isEmpty || sig == 'null') {
+      sig = json['programado'] == false ? 'D' : 'D';
+    }
+
+    String? hor;
+    final hEnt = json['hora_entrada']?.toString();
+    final hSal = json['hora_salida']?.toString();
+    if (hEnt != null && hSal != null && hEnt != 'null' && hSal != 'null') {
+      final ent = hEnt.length >= 5 ? hEnt.substring(0, 5) : hEnt;
+      final sal = hSal.length >= 5 ? hSal.substring(0, 5) : hSal;
+      hor = '$ent a $sal';
+    } else if (json['horario'] != null) {
+      hor = json['horario'].toString();
+    }
+
     return TurnoDiaRol(
-      dia: json['dia'] is int ? json['dia'] : int.tryParse(json['dia']?.toString() ?? '1') ?? 1,
+      dia: json['dia'] is int
+          ? json['dia']
+          : int.tryParse(json['dia']?.toString() ?? '1') ?? 1,
       fecha: json['fecha']?.toString() ?? '',
-      sigla: json['sigla']?.toString() ?? json['turno']?.toString() ?? 'D',
-      descripcion: json['descripcion']?.toString(),
-      horario: json['horario']?.toString(),
-      esGuardia: json['es_guardia'] == true ||
-          json['sigla'] == 'GD' ||
-          json['sigla'] == 'GN',
+      sigla: sig,
+      descripcion: json['turno_nombre']?.toString() ?? json['descripcion']?.toString(),
+      horario: hor,
+      nombreDia: json['nombre_dia']?.toString(),
+      totalHoras: json['total_horas'] is int
+          ? json['total_horas']
+          : int.tryParse(json['total_horas']?.toString() ?? '0') ?? 0,
+      esGuardia: json['es_guardia'] == true || sig == 'GD' || sig == 'GN',
+      programado: json['programado'] != false,
     );
   }
 
   @override
-  List<Object?> get props => [dia, fecha, sigla, descripcion, horario, esGuardia];
+  List<Object?> get props => [dia, fecha, sigla, descripcion, horario, nombreDia, totalHoras, esGuardia, programado];
 }
 
 class RolMensual extends Equatable {
@@ -134,6 +165,12 @@ class RolMensual extends Equatable {
   final List<TurnoDiaRol> turnos;
   final int totalHoras;
   final int totalGuardias;
+  final int diasProgramados;
+  final int diasDelMes;
+  final int topeHorasMes;
+  final int turnosMt;
+  final String estadoRol; // 'cerrado', 'abierto'
+  final bool rolCerrado;
 
   const RolMensual({
     required this.mes,
@@ -141,21 +178,62 @@ class RolMensual extends Equatable {
     required this.turnos,
     this.totalHoras = 0,
     this.totalGuardias = 0,
+    this.diasProgramados = 0,
+    this.diasDelMes = 30,
+    this.topeHorasMes = 150,
+    this.turnosMt = 0,
+    this.estadoRol = 'abierto',
+    this.rolCerrado = false,
   });
 
   factory RolMensual.fromJson(Map<String, dynamic> json) {
-    final list = json['turnos'] is List ? json['turnos'] as List : [];
+    // El backend envía la lista en 'dias' o 'turnos'
+    final rawList = json['dias'] ?? json['turnos'] ?? json['data'];
+    final list = rawList is List ? rawList : [];
+
+    final resumen = json['resumen_rol'] is Map<String, dynamic>
+        ? json['resumen_rol'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
     return RolMensual(
-      mes: json['mes'] is int ? json['mes'] : int.tryParse(json['mes']?.toString() ?? '1') ?? 1,
-      anio: json['anio'] is int ? json['anio'] : int.tryParse(json['anio']?.toString() ?? '2026') ?? 2026,
+      mes: json['mes'] is int
+          ? json['mes']
+          : int.tryParse(json['mes']?.toString() ?? '1') ?? 1,
+      anio: json['anho'] is int
+          ? json['anho']
+          : (json['anio'] is int
+              ? json['anio']
+              : int.tryParse(json['anho']?.toString() ?? json['anio']?.toString() ?? '2026') ?? 2026),
       turnos: list.map((item) => TurnoDiaRol.fromJson(item as Map<String, dynamic>)).toList(),
-      totalHoras: json['total_horas'] is int ? json['total_horas'] : 0,
-      totalGuardias: json['total_guardias'] is int ? json['total_guardias'] : 0,
+      totalHoras: resumen['total_horas_mes'] is int
+          ? resumen['total_horas_mes']
+          : (json['total_horas'] is int ? json['total_horas'] : 0),
+      totalGuardias: resumen['total_guardias_mes'] is int
+          ? resumen['total_guardias_mes']
+          : (json['total_guardias'] is int ? json['total_guardias'] : 0),
+      diasProgramados: resumen['dias_programados'] is int ? resumen['dias_programados'] : 0,
+      diasDelMes: resumen['dias_del_mes'] is int ? resumen['dias_del_mes'] : list.length,
+      topeHorasMes: resumen['tope_horas_mes'] is int ? resumen['tope_horas_mes'] : 150,
+      turnosMt: resumen['total_turnos_mt'] is int ? resumen['total_turnos_mt'] : 0,
+      estadoRol: json['estado_rol']?.toString() ?? 'abierto',
+      rolCerrado: json['rol_cerrado'] == true,
     );
   }
 
   @override
-  List<Object?> get props => [mes, anio, turnos, totalHoras, totalGuardias];
+  List<Object?> get props => [
+        mes,
+        anio,
+        turnos,
+        totalHoras,
+        totalGuardias,
+        diasProgramados,
+        diasDelMes,
+        topeHorasMes,
+        turnosMt,
+        estadoRol,
+        rolCerrado,
+      ];
 }
 
 class FaltasTardanzasResumen extends Equatable {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Paleta Institucional y Tokens de Diseño - Red de Salud Huánuco (RSHCO)
 class AppColors {
@@ -36,6 +37,45 @@ class AppColors {
   static const Color textPrimary = Color(0xFF0F172A);
   static const Color textSecondary = Color(0xFF475569);
   static const Color textMuted = Color(0xFF94A3B8);
+
+  // Paleta de Modo Oscuro (Pizarra Profunda y Contrastes Suaves - Nunca Negro Puro)
+  static const Color darkBackground = Color(0xFF0F172A);
+  static const Color darkSurface = Color(0xFF1E293B);
+  static const Color darkBorder = Color(0xFF334155);
+  static const Color darkTextPrimary = Color(0xFFF8FAFC);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
+  static const Color darkTextMuted = Color(0xFF64748B);
+
+  // Getters Contextuales para Adaptación Automática de Texto y Fondo
+  static Color getTextPrimary(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkTextPrimary
+        : textPrimary;
+  }
+
+  static Color getTextSecondary(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkTextSecondary
+        : textSecondary;
+  }
+
+  static Color getTextMuted(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkTextMuted
+        : textMuted;
+  }
+
+  static Color getSurface(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkSurface
+        : surface;
+  }
+
+  static Color getBackground(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkBackground
+        : background;
+  }
 }
 
 class AppTheme {
@@ -117,4 +157,110 @@ class AppTheme {
       ),
     );
   }
+
+  static ThemeData get darkTheme {
+    const bgDark = Color(0xFF0F172A);
+    const surfaceDark = Color(0xFF1E293B);
+    const borderDark = Color(0xFF334155);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primaryLight,
+        primary: const Color(0xFF38BDF8),
+        secondary: AppColors.accent,
+        surface: surfaceDark,
+        error: AppColors.error,
+        brightness: Brightness.dark,
+      ),
+      scaffoldBackgroundColor: bgDark,
+      textTheme: const TextTheme(
+        headlineLarge: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.bold),
+        headlineSmall: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.w600),
+        titleSmall: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(color: Color(0xFFE2E8F0)),
+        bodyMedium: TextStyle(color: Color(0xFFCBD5E1)),
+        bodySmall: TextStyle(color: Color(0xFF94A3B8)),
+        labelLarge: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.w600),
+        labelMedium: TextStyle(color: Color(0xFFCBD5E1)),
+        labelSmall: TextStyle(color: Color(0xFF94A3B8)),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: surfaceDark,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+          letterSpacing: 0.3,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: surfaceDark,
+        elevation: 1.5,
+        shadowColor: Colors.black.withOpacity(0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: borderDark, width: 1),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF0F172A),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: borderDark),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: borderDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 2),
+        ),
+        labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+        hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF0284C7),
+          foregroundColor: Colors.white,
+          elevation: 2,
+          minimumSize: const Size.fromHeight(50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() => ThemeMode.light;
+
+  void toggleTheme() {
+    state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  void setTheme(ThemeMode mode) {
+    state = mode;
+  }
+}
+
+final themeModeProvider =
+    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);

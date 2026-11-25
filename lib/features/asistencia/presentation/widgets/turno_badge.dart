@@ -13,6 +13,8 @@ class TurnoBadge extends StatelessWidget {
 
   static Color getColorForSigla(String sigla) {
     switch (sigla.toUpperCase()) {
+      case 'MT':
+        return const Color(0xFF1E40AF); // Azul institucional intenso
       case 'M':
         return AppColors.turnoManana;
       case 'T':
@@ -23,9 +25,11 @@ class TurnoBadge extends StatelessWidget {
       case 'GN':
         return AppColors.turnoGuardia;
       case 'D':
-        return AppColors.turnoDescanso;
+        return const Color(0xFF64748B); // Slate neutral para descanso
+      case 'F':
+        return const Color(0xFF0D9488); // Teal para feriados
       case 'VAC':
-        return Colors.teal;
+        return const Color(0xFF16A34A); // Verde para vacaciones
       case 'L':
       case 'CIT':
         return AppColors.warning;

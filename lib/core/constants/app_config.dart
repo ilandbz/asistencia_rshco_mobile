@@ -17,8 +17,8 @@ class AppConfig {
   }
 
   static const String appName = 'RSHCO Asistencia';
-  static const Duration connectTimeout = Duration(seconds: 15);
-  static const Duration receiveTimeout = Duration(seconds: 15);
+  static const Duration connectTimeout = Duration(seconds: 30);
+  static const Duration receiveTimeout = Duration(seconds: 90);
 
   // Claves de Storage
   static const String keyAuthToken = 'auth_token';
