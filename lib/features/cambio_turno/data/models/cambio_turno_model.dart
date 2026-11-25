@@ -29,14 +29,26 @@ class SolicitudCambioTurno extends Equatable {
 
   factory SolicitudCambioTurno.fromJson(Map<String, dynamic> json) {
     return SolicitudCambioTurno(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       fechaSolicitud: json['fecha_solicitud']?.toString() ?? '',
-      fechaMiTurno: json['fecha_mi_turno']?.toString() ?? json['fecha_turno_origen']?.toString() ?? '',
-      miTurnoSigla: json['mi_turno_sigla']?.toString() ?? json['turno_origen']?.toString() ?? '',
+      fechaMiTurno: json['fecha_mi_turno']?.toString() ??
+          json['fecha_turno_origen']?.toString() ??
+          '',
+      miTurnoSigla: json['mi_turno_sigla']?.toString() ??
+          json['turno_origen']?.toString() ??
+          '',
       colegaDni: json['colega_dni']?.toString() ?? '',
-      colegaNombre: json['colega_nombre']?.toString() ?? json['nombre_colega']?.toString() ?? '',
-      fechaTurnoColega: json['fecha_turno_colega']?.toString() ?? json['fecha_turno_destino']?.toString() ?? '',
-      colegaTurnoSigla: json['colega_turno_sigla']?.toString() ?? json['turno_destino']?.toString() ?? '',
+      colegaNombre: json['colega_nombre']?.toString() ??
+          json['nombre_colega']?.toString() ??
+          '',
+      fechaTurnoColega: json['fecha_turno_colega']?.toString() ??
+          json['fecha_turno_destino']?.toString() ??
+          '',
+      colegaTurnoSigla: json['colega_turno_sigla']?.toString() ??
+          json['turno_destino']?.toString() ??
+          '',
       motivo: json['motivo']?.toString() ?? '',
       estado: json['estado']?.toString() ?? 'SOLICITADO',
       motivoRechazo: json['motivo_rechazo']?.toString(),
@@ -76,8 +88,11 @@ class ColegaSearchResult extends Equatable {
 
   factory ColegaSearchResult.fromJson(Map<String, dynamic> json) {
     return ColegaSearchResult(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      dni: json['dni']?.toString() ?? json['numero_documento']?.toString() ?? '',
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      dni:
+          json['dni']?.toString() ?? json['numero_documento']?.toString() ?? '',
       nombreCompleto: json['nombre_completo']?.toString() ??
           '${json['nombres'] ?? ''} ${json['apellido_paterno'] ?? ''}'.trim(),
       cargo: json['cargo']?.toString(),
@@ -101,10 +116,16 @@ class ValidacionCambioTurnoResult extends Equatable {
   });
 
   factory ValidacionCambioTurnoResult.fromJson(Map<String, dynamic> json) {
-    final list = json['advertencias'] is List ? (json['advertencias'] as List).map((e) => e.toString()).toList() : <String>[];
+    final list = json['advertencias'] is List
+        ? (json['advertencias'] as List).map((e) => e.toString()).toList()
+        : <String>[];
     return ValidacionCambioTurnoResult(
-      esValido: json['es_valido'] == true || json['valido'] == true || json['status'] == 'success',
-      mensaje: json['message']?.toString() ?? json['mensaje']?.toString() ?? 'Validación completada',
+      esValido: json['es_valido'] == true ||
+          json['valido'] == true ||
+          json['status'] == 'success',
+      mensaje: json['message']?.toString() ??
+          json['mensaje']?.toString() ??
+          'Validación completada',
       advertencias: list,
     );
   }

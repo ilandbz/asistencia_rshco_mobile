@@ -208,7 +208,12 @@ class SolicitudPermisoItem extends Equatable {
       motivo: json['motivo']?.toString() ?? '',
       estado: json['estado']?.toString() ?? 'PENDIENTE',
       cittNumero: nroCert,
-      adjuntoUrl: json['adjunto_url']?.toString() ?? json['archivo']?.toString(),
+      adjuntoUrl: json['adjunto_url']?.toString() ??
+          json['archivo']?.toString() ??
+          json['adjunto']?.toString() ??
+          json['documento']?.toString() ??
+          json['archivo_adjunto']?.toString() ??
+          json['url_archivo']?.toString(),
       diagnostico: diag,
     );
   }

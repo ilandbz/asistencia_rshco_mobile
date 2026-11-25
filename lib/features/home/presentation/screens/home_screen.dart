@@ -60,18 +60,15 @@ class HomeScreen extends ConsumerWidget {
             // 1. Tarjeta Cálida de Bienvenida y Perfil (Interactiva)
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-                      : [AppColors.primary, AppColors.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: isDark ? const Color(0xFF1E293B) : AppColors.primary,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : Colors.transparent,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.25),
-                    blurRadius: 12,
+                    color: Colors.black.withOpacity(isDark ? 0.25 : 0.08),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -264,6 +261,17 @@ class HomeScreen extends ConsumerWidget {
     required String description,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = isDark
+        ? (color == AppColors.primary
+            ? const Color(0xFF38BDF8)
+            : (color == AppColors.turnoGuardia
+                ? const Color(0xFFA78BFA)
+                : (color == AppColors.turnoTarde
+                    ? const Color(0xFFFB923C)
+                    : const Color(0xFF4ADE80))))
+        : color;
+
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -275,10 +283,10 @@ class HomeScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: effectiveColor.withOpacity(isDark ? 0.2 : 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: effectiveColor, size: 28),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -305,7 +313,11 @@ class HomeScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textMuted),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
+              ),
             ],
           ),
         ),

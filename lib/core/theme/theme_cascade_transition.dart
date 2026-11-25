@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Transición en Cascada que desciende de arriba hacia abajo
-/// al alternar entre modo claro y oscuro, sin gradientes y con tonos sólidos elegantes.
+/// Transición de Cascada Fluida y Uniforme
+/// Desciende de manera homogénea en toda la pantalla en un lapso de 1.5 segundos,
+/// tiñendo progresivamente la interfaz entre modo claro y modo oscuro,
+/// sin cortes agresivos ni rectángulos escalonados.
 class ThemeCascadeTransition extends StatefulWidget {
   final ThemeMode themeMode;
   final Widget child;
@@ -27,7 +29,7 @@ class _ThemeCascadeTransitionState extends State<ThemeCascadeTransition>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 1500),
     );
 
     _controller.addStatusListener((status) {
@@ -61,10 +63,10 @@ class _ThemeCascadeTransitionState extends State<ThemeCascadeTransition>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Contenido de la aplicación con el tema actual
+        // Contenido de la aplicación
         widget.child,
 
-        // Cascada animada que desciende de arriba hacia abajo
+        // Velo fluido de cascada que desciende de manera uniforme
         if (_isAnimating)
           Positioned.fill(
             child: IgnorePointer(
@@ -72,7 +74,7 @@ class _ThemeCascadeTransitionState extends State<ThemeCascadeTransition>
                 animation: _controller,
                 builder: (context, _) {
                   return CustomPaint(
-                    painter: _CascadeWaterfallPainter(
+                    painter: _SmoothCascadePainter(
                       progress: _controller.value,
                       isDark: _targetIsDark,
                     ),
@@ -86,74 +88,59 @@ class _ThemeCascadeTransitionState extends State<ThemeCascadeTransition>
   }
 }
 
-/// Pintor de la cascada escalonada (sin gradientes, colores sólidos elegantes)
-class _CascadeWaterfallPainter extends CustomPainter {
+/// Pintor de la cascada suave y uniforme (100% homogénea a lo ancho)
+class _SmoothCascadePainter extends CustomPainter {
   final double progress;
   final bool isDark;
 
-  _CascadeWaterfallPainter({
+  _SmoothCascadePainter({
     required this.progress,
     required this.isDark,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (progress <= 0.0) return;
+    if (progress <= 0.0 || progress >= 1.0) return;
 
-    // Color de relleno sólido: Azul pizarra profundo (#0F172A) o Blanco institucional (#F8FAFC)
-    final fillColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
-    // Borde frontal sólido de la cascada
-    final frontColor = isDark ? const Color(0xFF00A3E0) : const Color(0xFF003876);
+    // Tono institucional sólido elegante: Pizarra profunda (#0F172A) o Blanco institucional (#F8FAFC)
+    final Color baseColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+    // Borde frontal sutil que guía la cascada
+    final Color frontColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF003876);
+
+    // Curva de aceleración y desaceleración orgánica
+    final double curved = Curves.easeInOutCubic.transform(progress);
+    final double currentHeight = size.height * curved;
+
+    // Desvanecimiento suave en el tramo final para un cierre sedoso
+    double alpha = 0.90;
+    if (progress > 0.80) {
+      final double fadeOut = ((1.0 - progress) / 0.20).clamp(0.0, 1.0);
+      alpha = 0.90 * fadeOut;
+    }
 
     final fillPaint = Paint()
-      ..color = fillColor
+      ..color = baseColor.withOpacity(alpha)
       ..style = PaintingStyle.fill;
 
+    // 1. Manto uniforme que cubre el ancho completo de la pantalla
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, currentHeight),
+      fillPaint,
+    );
+
+    // 2. Línea frontal sutil de contacto de 2.0px de grosor
     final frontPaint = Paint()
-      ..color = frontColor
+      ..color = frontColor.withOpacity(alpha * 0.7)
       ..style = PaintingStyle.fill;
 
-    // 6 columnas de cascada con desfase progresivo para crear el efecto de cascada natural
-    const int columnCount = 6;
-    final columnWidth = size.width / columnCount;
-    const delays = [0.00, 0.06, 0.02, 0.10, 0.04, 0.08];
-
-    // Desvanecimiento suave en el último 10% del recorrido
-    double globalAlpha = 1.0;
-    if (progress > 0.90) {
-      globalAlpha = ((1.0 - progress) / 0.10).clamp(0.0, 1.0);
-    }
-
-    fillPaint.color = fillColor.withOpacity(globalAlpha);
-    frontPaint.color = frontColor.withOpacity(globalAlpha);
-
-    for (int i = 0; i < columnCount; i++) {
-      final delay = delays[i % delays.length];
-      // Tiempo local de cada columna
-      final localProgress = ((progress - delay) / (1.0 - delay)).clamp(0.0, 1.0);
-      final curved = Curves.easeInOutCubic.transform(localProgress);
-
-      final colLeft = i * columnWidth;
-      final currentHeight = size.height * curved;
-
-      if (currentHeight > 0) {
-        // 1. Relleno sólido de la columna
-        canvas.drawRect(
-          Rect.fromLTWH(colLeft, 0, columnWidth + 0.5, currentHeight),
-          fillPaint,
-        );
-
-        // 2. Línea frontal de impacto de la cascada (4px de grosor)
-        canvas.drawRect(
-          Rect.fromLTWH(colLeft, currentHeight - 3, columnWidth + 0.5, 3),
-          frontPaint,
-        );
-      }
-    }
+    canvas.drawRect(
+      Rect.fromLTWH(0, currentHeight - 2.0, size.width, 2.0),
+      frontPaint,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant _CascadeWaterfallPainter oldDelegate) {
+  bool shouldRepaint(covariant _SmoothCascadePainter oldDelegate) {
     return oldDelegate.progress != progress || oldDelegate.isDark != isDark;
   }
 }

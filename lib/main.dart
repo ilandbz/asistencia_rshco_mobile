@@ -30,7 +30,7 @@ class RshcoApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      themeAnimationDuration: const Duration(milliseconds: 650),
+      themeAnimationDuration: const Duration(milliseconds: 1500),
       themeAnimationCurve: Curves.easeInOutCubic,
       routerConfig: router,
       builder: (context, child) {

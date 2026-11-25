@@ -76,6 +76,12 @@ class AppColors {
         ? darkBackground
         : background;
   }
+
+  static Color getPrimary(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF38BDF8)
+        : primary;
+  }
 }
 
 class AppTheme {

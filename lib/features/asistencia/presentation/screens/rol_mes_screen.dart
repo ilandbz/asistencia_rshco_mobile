@@ -18,6 +18,7 @@ class RolMesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(currentFilterProvider);
     final rolAsync = ref.watch(rolMensualProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -35,12 +36,23 @@ class RolMesScreen extends ConsumerWidget {
           // 1. Selector de Mes y Año
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
+                ),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left_rounded, size: 28),
+                  icon: Icon(
+                    Icons.chevron_left_rounded,
+                    size: 28,
+                    color: isDark ? const Color(0xFFF8FAFC) : AppColors.primary,
+                  ),
                   onPressed: () {
                     final prevMes = filter.mes == 1 ? 12 : filter.mes - 1;
                     final prevAnio = filter.mes == 1 ? filter.anio - 1 : filter.anio;
@@ -52,21 +64,28 @@ class RolMesScreen extends ConsumerWidget {
                   children: [
                     Text(
                       '${meses[filter.mes - 1]} ${filter.anio}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
+                    Text(
                       'Programación de turnos del personal',
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right_rounded, size: 28),
+                  icon: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 28,
+                    color: isDark ? const Color(0xFFF8FAFC) : AppColors.primary,
+                  ),
                   onPressed: () {
                     final nextMes = filter.mes == 12 ? 1 : filter.mes + 1;
                     final nextAnio = filter.mes == 12 ? filter.anio + 1 : filter.anio;
@@ -77,12 +96,11 @@ class RolMesScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
 
           // 2. Leyenda de Siglas de Turnos
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            color: AppColors.surfaceVariant.withOpacity(0.4),
+            color: isDark ? const Color(0xFF0F172A) : AppColors.surfaceVariant.withOpacity(0.4),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -199,12 +217,14 @@ class RolMesScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
+                              color: Colors.black.withOpacity(isDark ? 0.2 : 0.02),
                               blurRadius: 4,
                               offset: const Offset(0, 1),
                             ),
@@ -214,24 +234,29 @@ class RolMesScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildKpiTurno(
+                              isDark: isDark,
                               icon: Icons.calendar_month_outlined,
                               titulo: 'Laborables',
                               valor: '${rol.diasProgramados} días',
-                              color: AppColors.primary,
+                              color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                             ),
-                            Container(width: 1, height: 30, color: Colors.grey.shade200),
+                            Container(width: 1, height: 30, color: isDark ? const Color(0xFF334155) : Colors.grey.shade200),
                             _buildKpiTurno(
+                              isDark: isDark,
                               icon: Icons.schedule_outlined,
                               titulo: 'Horas Mes',
                               valor: '${rol.totalHoras} h',
-                              color: const Color(0xFF0D9488),
+                              color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0D9488),
                             ),
-                            Container(width: 1, height: 30, color: Colors.grey.shade200),
+                            Container(width: 1, height: 30, color: isDark ? const Color(0xFF334155) : Colors.grey.shade200),
                             _buildKpiTurno(
+                              isDark: isDark,
                               icon: rol.rolCerrado ? Icons.verified_rounded : Icons.pending_actions_rounded,
                               titulo: 'Estado',
                               valor: rol.rolCerrado ? 'Aprobado' : 'Borrador',
-                              color: rol.rolCerrado ? AppColors.success : AppColors.warning,
+                              color: rol.rolCerrado
+                                  ? (isDark ? const Color(0xFF4ADE80) : AppColors.success)
+                                  : (isDark ? const Color(0xFFFBBF24) : AppColors.warning),
                             ),
                           ],
                         ),
@@ -260,7 +285,9 @@ class RolMesScreen extends ConsumerWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                               side: BorderSide(
-                                color: turno.sigla == 'D' ? Colors.grey.shade200 : AppColors.primary.withOpacity(0.2),
+                                color: isDark
+                                    ? (turno.sigla == 'D' ? const Color(0xFF334155) : const Color(0xFF0284C7).withOpacity(0.4))
+                                    : (turno.sigla == 'D' ? Colors.grey.shade200 : AppColors.primary.withOpacity(0.2)),
                               ),
                             ),
                             child: InkWell(
@@ -276,7 +303,9 @@ class RolMesScreen extends ConsumerWidget {
                                       style: TextStyle(
                                         fontSize: 10.5,
                                         fontWeight: FontWeight.bold,
-                                        color: turno.sigla == 'D' ? AppColors.textSecondary : AppColors.primaryDark,
+                                        color: turno.sigla == 'D'
+                                            ? (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary)
+                                            : (isDark ? const Color(0xFFF8FAFC) : AppColors.primaryDark),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -289,7 +318,9 @@ class RolMesScreen extends ConsumerWidget {
                                       style: TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w600,
-                                        color: turno.totalHoras > 0 ? AppColors.textPrimary : AppColors.textSecondary,
+                                        color: turno.totalHoras > 0
+                                            ? (isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary)
+                                            : (isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                                       ),
                                     ),
                                   ],
@@ -311,6 +342,7 @@ class RolMesScreen extends ConsumerWidget {
   }
 
   Widget _buildKpiTurno({
+    required bool isDark,
     required IconData icon,
     required String titulo,
     required String valor,
@@ -324,8 +356,17 @@ class RolMesScreen extends ConsumerWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(titulo, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-            Text(valor, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+            Text(
+              titulo,
+              style: TextStyle(
+                fontSize: 10,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              valor,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+            ),
           ],
         ),
       ],
@@ -472,12 +513,19 @@ class _LeyendaItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         TurnoBadge(sigla: sigla, size: 20),
         const SizedBox(width: 4),
-        Text(nombre, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        Text(
+          nombre,
+          style: TextStyle(
+            fontSize: 11,
+            color: isDark ? const Color(0xFFCBD5E1) : AppColors.textSecondary,
+          ),
+        ),
       ],
     );
   }

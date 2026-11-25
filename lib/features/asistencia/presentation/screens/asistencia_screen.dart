@@ -56,7 +56,7 @@ class AsistenciaScreen extends ConsumerWidget {
                         style: const TextStyle(color: AppColors.error)),
                   ),
                 ),
-                data: (hoy) => _buildHoyCard(hoy),
+                data: (hoy) => _buildHoyCard(context, hoy),
               ),
               const SizedBox(height: 20),
 
@@ -64,17 +64,17 @@ class AsistenciaScreen extends ConsumerWidget {
               resumenAsync.when(
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
-                data: (resumen) => _buildResumenCard(resumen),
+                data: (resumen) => _buildResumenCard(context, resumen),
               ),
               const SizedBox(height: 20),
 
               // 3. Historial de Registros del Mes
-              const Text(
+              Text(
                 'Registros de Asistencia del Mes',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: AppColors.getTextPrimary(context),
                 ),
               ),
               const SizedBox(height: 12),
@@ -111,7 +111,7 @@ class AsistenciaScreen extends ConsumerWidget {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final item = registros[index];
-                      return _buildRegistroTile(item);
+                      return _buildRegistroTile(context, item);
                     },
                   );
                 },
@@ -123,10 +123,13 @@ class AsistenciaScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHoyCard(dynamic hoy) {
+  Widget _buildHoyCard(BuildContext context, dynamic hoy) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final estadoColor = hoy.estado == 'MARCADO' || hoy.estado == 'ASISTIO'
-        ? AppColors.success
-        : (hoy.estado == 'TARDANZA' ? AppColors.warning : AppColors.primary);
+        ? (isDark ? const Color(0xFF4ADE80) : AppColors.success)
+        : (hoy.estado == 'TARDANZA'
+            ? (isDark ? const Color(0xFFFBBF24) : AppColors.warning)
+            : (isDark ? const Color(0xFF38BDF8) : AppColors.primary));
 
     return Card(
       elevation: 2,
@@ -140,11 +143,19 @@ class AsistenciaScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.access_time_filled_rounded, color: AppColors.primary, size: 22),
+                    Icon(
+                      Icons.access_time_filled_rounded,
+                      color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                      size: 22,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       hoy.fecha.isNotEmpty ? 'Fecha: ${hoy.fecha}' : 'Marcación de Hoy',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary,
+                      ),
                     ),
                   ],
                 ),
@@ -183,12 +194,19 @@ class AsistenciaScreen extends ConsumerWidget {
                             : (hoy.turnoProgramado != null
                                 ? 'Turno: ${hoy.turnoProgramado}'
                                 : 'Turno: Sin programar'),
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary,
+                        ),
                       ),
                       if (hoy.horaEntradaProgramada != null && hoy.horaSalidaProgramada != null)
                         Text(
                           'Horario: ${hoy.horaEntradaProgramada} - ${hoy.horaSalidaProgramada}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                          ),
                         ),
                     ],
                   ),
@@ -200,17 +218,23 @@ class AsistenciaScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildTimeBox(
+                  context: context,
                   label: 'Primer Ingreso',
                   time: hoy.primerIngreso ?? '--:--',
                   icon: Icons.login_rounded,
-                  color: AppColors.success,
+                  color: isDark ? const Color(0xFF4ADE80) : AppColors.success,
                 ),
-                Container(width: 1, height: 40, color: AppColors.border),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: isDark ? const Color(0xFF334155) : AppColors.border,
+                ),
                 _buildTimeBox(
+                  context: context,
                   label: 'Último Egreso',
                   time: hoy.ultimoEgreso ?? '--:--',
                   icon: Icons.logout_rounded,
-                  color: AppColors.primary,
+                  color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                 ),
               ],
             ),
@@ -221,11 +245,13 @@ class AsistenciaScreen extends ConsumerWidget {
   }
 
   Widget _buildTimeBox({
+    required BuildContext context,
     required String label,
     required String time,
     required IconData icon,
     required Color color,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Row(
@@ -233,7 +259,13 @@ class AsistenciaScreen extends ConsumerWidget {
           children: [
             Icon(icon, size: 16, color: color),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 4),
@@ -242,31 +274,39 @@ class AsistenciaScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: time == '--:--' ? AppColors.textMuted : AppColors.textPrimary,
+            color: time == '--:--'
+                ? (isDark ? const Color(0xFF64748B) : AppColors.textMuted)
+                : AppColors.getTextPrimary(context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildResumenCard(dynamic resumen) {
+  Widget _buildResumenCard(BuildContext context, dynamic resumen) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       elevation: 1,
-      color: AppColors.surfaceVariant.withOpacity(0.5),
+      color: isDark ? const Color(0xFF1E293B) : AppColors.surfaceVariant.withOpacity(0.5),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Resumen Mensual de Asistencia',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.getTextPrimary(context),
+              ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: _buildMetricTile(
+                    context: context,
                     label: 'Minutos Tardanza',
                     value: '${resumen.minutosTardanzaTotal} min',
                     color: AppColors.warning,
@@ -275,6 +315,7 @@ class AsistenciaScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildMetricTile(
+                    context: context,
                     label: 'N° Tardanzas',
                     value: '${resumen.conteoTardanzas}',
                     color: AppColors.warning,
@@ -283,6 +324,7 @@ class AsistenciaScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildMetricTile(
+                    context: context,
                     label: 'Faltas',
                     value: '${resumen.faltasTotal}',
                     color: AppColors.error,
@@ -296,13 +338,21 @@ class AsistenciaScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricTile({required String label, required String value, required Color color}) {
+  Widget _buildMetricTile({
+    required BuildContext context,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : AppColors.border,
+        ),
       ),
       child: Column(
         children: [
@@ -314,18 +364,22 @@ class AsistenciaScreen extends ConsumerWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRegistroTile(dynamic item) {
+  Widget _buildRegistroTile(BuildContext context, dynamic item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color badgeColor = AppColors.turnoDescanso;
-    if (item.estado == 'ASISTIO') badgeColor = AppColors.success;
-    if (item.estado == 'TARDANZA') badgeColor = AppColors.warning;
-    if (item.estado == 'FALTA') badgeColor = AppColors.error;
+    if (item.estado == 'ASISTIO') badgeColor = isDark ? const Color(0xFF4ADE80) : AppColors.success;
+    if (item.estado == 'TARDANZA') badgeColor = isDark ? const Color(0xFFFBBF24) : AppColors.warning;
+    if (item.estado == 'FALTA') badgeColor = isDark ? const Color(0xFFF87171) : AppColors.error;
 
     return Card(
       child: Padding(
@@ -340,12 +394,19 @@ class AsistenciaScreen extends ConsumerWidget {
                 children: [
                   Text(
                     '${item.diaNombre} ${item.fecha}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: isDark ? const Color(0xFFF8FAFC) : AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'Ingreso: ${item.entrada ?? "--:--"} | Salida: ${item.salida ?? "--:--"}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
