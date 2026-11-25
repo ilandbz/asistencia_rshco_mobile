@@ -622,9 +622,19 @@ class RegistroAsistenciaItem extends Equatable {
         ? PermisoDiaResumen.fromJson(json['permiso'] as Map<String, dynamic>)
         : null;
 
+    String diaNom = json['nombre_dia']?.toString() ?? json['dia_nombre']?.toString() ?? '';
+    final f = json['fecha']?.toString() ?? json['dia']?.toString() ?? '';
+    if (diaNom.isEmpty && f.isNotEmpty) {
+      final parsedDate = DateTime.tryParse(f);
+      if (parsedDate != null) {
+        const dias = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
+        diaNom = dias[parsedDate.weekday - 1];
+      }
+    }
+
     return RegistroAsistenciaItem(
-      fecha: json['fecha']?.toString() ?? json['dia']?.toString() ?? '',
-      diaNombre: json['nombre_dia']?.toString() ?? json['dia_nombre']?.toString() ?? '',
+      fecha: f,
+      diaNombre: diaNom,
       turno: t,
       turnoNombre: _cleanHoraExacta(json['turno_nombre']),
       totalHoras: _parseAsInt(json['total_horas']),
@@ -646,6 +656,78 @@ class RegistroAsistenciaItem extends Equatable {
       marcaciones: marcacionesParsed,
       permiso: permisoObj,
     );
+  }
+
+  bool get esFinDeSemana {
+    final date = DateTime.tryParse(fecha);
+    if (date != null && (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday)) {
+      return true;
+    }
+    final diaNorm = diaNombre.toUpperCase();
+    return diaNorm.contains('SÁB') || diaNorm.contains('SAB') || diaNorm.contains('DOM');
+  }
+
+  bool get tieneMarcaciones {
+    final hasEnt = entrada != null && entrada!.trim().isNotEmpty && entrada != '--:--';
+    final hasSal = salida != null && salida!.trim().isNotEmpty && salida != '--:--';
+    final hasMarc = marcaciones.isNotEmpty;
+    final hasTurnos = turnosDetalle.any((td) =>
+        (td.horaMarcEntrada != null && td.horaMarcEntrada!.trim().isNotEmpty && td.horaMarcEntrada != '--:--') ||
+        (td.horaMarcSalida != null && td.horaMarcSalida!.trim().isNotEmpty && td.horaMarcSalida != '--:--'));
+    return hasEnt || hasSal || hasMarc || hasTurnos;
+  }
+
+  bool get esAsistenciaValida {
+    final u = estado.toUpperCase().trim();
+    return u == 'ASISTIO' || u == 'MARCADO' || u == 'TARDANZA' || minutosTardanza > 0;
+  }
+
+  bool get esFalta {
+    final u = estado.toUpperCase().trim();
+    return u == 'FALTA' || faltasDia > 0;
+  }
+
+  bool get tienePermiso {
+    final u = estado.toUpperCase().trim();
+    return permiso != null ||
+        (permisoNombre != null && permisoNombre!.trim().isNotEmpty) ||
+        u == 'PERMISO' ||
+        u.contains('LICENCIA');
+  }
+
+  bool get debeMostrarEnHistorial {
+    // 1. Sábados y domingos no laborables: solo mostrar si asistió y marcó
+    if (esFinDeSemana) {
+      return tieneMarcaciones || esAsistenciaValida;
+    }
+
+    // 2. Feriados no laborables: solo mostrar si hubo asistencia efectiva
+    if (esFeriado || estado.toUpperCase().trim() == 'FERIADO') {
+      return tieneMarcaciones || esAsistenciaValida;
+    }
+
+    // 3. Días pendientes que aún no ocurren o no tienen registro: no mostrar
+    if (estado.toUpperCase().trim() == 'PENDIENTE' && !tieneMarcaciones) {
+      return false;
+    }
+
+    // 4. Días sin horario o descansos: solo mostrar si asistió o tuvo permiso
+    if (estado.toUpperCase().trim() == 'SIN_HORARIO' || estado.toUpperCase().trim() == 'DESCANSO') {
+      return tieneMarcaciones || tienePermiso;
+    }
+
+    // 5. Si es falta, mostrarlo siempre para que el usuario conozca su condición
+    if (esFalta) {
+      return true;
+    }
+
+    // 6. Si tiene marcación efectiva, asistencia, tardanza o permiso/licencia
+    if (tieneMarcaciones || esAsistenciaValida || tienePermiso || tieneIncidencia) {
+      return true;
+    }
+
+    // 7. Por defecto, ocultar días sin datos registrados
+    return false;
   }
 
   @override

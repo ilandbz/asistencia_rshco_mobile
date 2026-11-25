@@ -51,26 +51,29 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. Tarjeta Cálida de Bienvenida y Perfil (Interactiva)
+            // 1. Banner de Bienvenida y Perfil (Asimétrico: puntas en A y D, redondeado en B y C)
             Container(
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFF2B6CB0),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.zero,
+                  topRight: Radius.circular(28),
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.zero,
+                ),
                 border: Border.all(
                   color: isDark ? const Color(0xFF334155) : Colors.transparent,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.25 : 0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.zero,
+                    topRight: Radius.circular(28),
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.zero,
+                  ),
                   onTap: () => context.push('/perfil'),
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
@@ -192,7 +195,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
-            // Accesos Directos a Módulos
+            // Accesos Directos a Módulos en Cuadrícula 2x2
             Text(
               'Módulos y Servicios',
               style: TextStyle(
@@ -203,54 +206,79 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            _buildModuleCard(
-              context: context,
-              icon: Icons.fingerprint_rounded,
-              color: AppColors.primary,
-              title: 'Asistencia y Marcaciones',
-              description: 'Estado de hoy, registro mensual de asistencia y récord de tardanzas.',
-              onTap: () => context.push('/asistencia'),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.24,
+              children: [
+                _buildSquareModuleCard(
+                  context: context,
+                  icon: Icons.fingerprint_rounded,
+                  color: AppColors.primary,
+                  lightBg: const Color(0xFFEFF6FF),
+                  lightBorder: const Color(0xFFBFDBFE),
+                  darkBg: const Color(0xFF132338),
+                  darkBorder: const Color(0xFF1E3A8A),
+                  title: 'Asistencia y Marcaciones',
+                  description: 'Registro de hoy y récord',
+                  onTap: () => context.push('/asistencia'),
+                ),
+                _buildSquareModuleCard(
+                  context: context,
+                  icon: Icons.calendar_month_rounded,
+                  color: AppColors.turnoGuardia,
+                  lightBg: const Color(0xFFF5F3FF),
+                  lightBorder: const Color(0xFFDDD6FE),
+                  darkBg: const Color(0xFF201836),
+                  darkBorder: const Color(0xFF5B21B6),
+                  title: 'Rol de Turnos Mensual',
+                  description: 'Calendario y turnos',
+                  onTap: () => context.push('/rol-mes'),
+                ),
+                _buildSquareModuleCard(
+                  context: context,
+                  icon: Icons.published_with_changes_rounded,
+                  color: AppColors.turnoTarde,
+                  lightBg: const Color(0xFFFFF7ED),
+                  lightBorder: const Color(0xFFFED7AA),
+                  darkBg: const Color(0xFF2B1D16),
+                  darkBorder: const Color(0xFF9A3412),
+                  title: 'Cambio de Turno',
+                  description: 'Permutas entre colegas',
+                  onTap: () => context.push('/cambio-turno'),
+                ),
+                _buildSquareModuleCard(
+                  context: context,
+                  icon: Icons.assignment_rounded,
+                  color: AppColors.success,
+                  lightBg: const Color(0xFFF0FDF4),
+                  lightBorder: const Color(0xFFBBF7D0),
+                  darkBg: const Color(0xFF12281D),
+                  darkBorder: const Color(0xFF065F46),
+                  title: 'Descansos y CITT',
+                  description: 'Licencias y subsidios',
+                  onTap: () => context.push('/permisos'),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-
-            _buildModuleCard(
-              context: context,
-              icon: Icons.calendar_month_rounded,
-              color: AppColors.turnoGuardia,
-              title: 'Rol de Turnos Mensual',
-              description: 'Calendario de turnos programados, guardias diurnas y nocturnas.',
-              onTap: () => context.push('/rol-mes'),
-            ),
-            const SizedBox(height: 12),
-
-            _buildModuleCard(
-              context: context,
-              icon: Icons.published_with_changes_rounded,
-              color: AppColors.turnoTarde,
-              title: 'Solicitud de Cambio de Turno',
-              description: 'Permutas con colegas del servicio previas a la ejecución del rol.',
-              onTap: () => context.push('/cambio-turno'),
-            ),
-            const SizedBox(height: 12),
-
-            _buildModuleCard(
-              context: context,
-              icon: Icons.assignment_rounded,
-              color: AppColors.success,
-              title: 'Permisos & Descansos (CIT)',
-              description: 'Trámite de CIT, subsidios EsSalud (>20 días), permisos particulares.',
-              onTap: () => context.push('/permisos'),
-            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildModuleCard({
+  Widget _buildSquareModuleCard({
     required BuildContext context,
     required IconData icon,
     required Color color,
+    required Color lightBg,
+    required Color lightBorder,
+    required Color darkBg,
+    required Color darkBorder,
     required String title,
     required String description,
     required VoidCallback onTap,
@@ -266,53 +294,80 @@ class HomeScreen extends ConsumerWidget {
                     : const Color(0xFF4ADE80))))
         : color;
 
-    return Card(
-      child: InkWell(
-        onTap: onTap,
+    final backgroundColor = isDark ? darkBg : lightBg;
+    final borderColor = isDark ? darkBorder.withOpacity(0.55) : lightBorder;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: effectiveColor.withOpacity(isDark ? 0.2 : 0.12),
-                  borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: borderColor,
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Ícono distintivo centrado
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: effectiveColor.withOpacity(isDark ? 0.25 : 0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: effectiveColor,
+                    size: 27,
+                  ),
                 ),
-                child: Icon(icon, color: effectiveColor, size: 28),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.getTextPrimary(context),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.getTextSecondary(context),
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 6),
+
+                // Título centrado
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.getTextPrimary(context),
+                    height: 1.15,
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: isDark ? const Color(0xFF64748B) : AppColors.textMuted,
-              ),
-            ],
+                const SizedBox(height: 2),
+
+                // Subtítulo descriptivo centrado
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.getTextSecondary(context),
+                    height: 1.15,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

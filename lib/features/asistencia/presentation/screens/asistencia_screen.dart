@@ -180,14 +180,27 @@ class AsistenciaScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                data: (registros) {
+                data: (registrosRaw) {
+                  // Filtrar días no laborables sin actividad y ordenar de más reciente a más antiguo
+                  final registros = registrosRaw
+                      .where((item) => item.debeMostrarEnHistorial)
+                      .toList()
+                    ..sort((a, b) {
+                      final dateA = DateTime.tryParse(a.fecha);
+                      final dateB = DateTime.tryParse(b.fecha);
+                      if (dateA != null && dateB != null) {
+                        return dateB.compareTo(dateA);
+                      }
+                      return b.fecha.compareTo(a.fecha);
+                    });
+
                   if (registros.isEmpty) {
                     return Card(
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
                         child: Center(
                           child: Text(
-                            'No se encontraron registros para ${_meses[filter.mes - 1].toLowerCase()} ${filter.anio}.',
+                            'No hay asistencias registradas aún para ${_meses[filter.mes - 1].toLowerCase()} ${filter.anio}.',
                             style: TextStyle(color: AppColors.getTextSecondary(context)),
                           ),
                         ),
@@ -212,6 +225,25 @@ class AsistenciaScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _formatearFechaTitulo(String diaNombre, String fecha) {
+    String fechaStr = fecha;
+    final parts = fecha.split('-');
+    if (parts.length == 3) {
+      fechaStr = '${parts[2]}/${parts[1]}/${parts[0]}';
+    }
+
+    final hoy = DateTime.now();
+    final hoyStr =
+        '${hoy.year.toString().padLeft(4, '0')}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}';
+    final esHoy = fecha == hoyStr;
+
+    final dia = diaNombre.isNotEmpty ? diaNombre : '';
+    if (dia.isNotEmpty) {
+      return esHoy ? '$dia • $fechaStr (HOY)' : '$dia • $fechaStr';
+    }
+    return esHoy ? '$fechaStr (HOY)' : fechaStr;
   }
 
   ({Color color, String text}) _resolveEstadoVisual(String estado, bool isDark) {
@@ -571,9 +603,7 @@ class AsistenciaScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.diaNombre.isNotEmpty
-                          ? '${item.diaNombre} • ${item.fecha}'
-                          : item.fecha,
+                      _formatearFechaTitulo(item.diaNombre, item.fecha),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -687,9 +717,7 @@ class AsistenciaScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.diaNombre.isNotEmpty
-                                  ? '${item.diaNombre} • ${item.fecha}'
-                                  : item.fecha,
+                              _formatearFechaTitulo(item.diaNombre, item.fecha),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

@@ -68,6 +68,21 @@ class AsistenciaRepositoryImpl implements AsistenciaRepository {
     } else if (data is List) {
       list = data;
     }
-    return list.map((item) => RegistroAsistenciaItem.fromJson(item as Map<String, dynamic>)).toList();
+    final parsed = list
+        .map((item) => RegistroAsistenciaItem.fromJson(item as Map<String, dynamic>))
+        .where((item) => item.debeMostrarEnHistorial)
+        .toList();
+
+    // Ordenar de más reciente (hoy / día 25) a más antiguo (día 1)
+    parsed.sort((a, b) {
+      final dateA = DateTime.tryParse(a.fecha);
+      final dateB = DateTime.tryParse(b.fecha);
+      if (dateA != null && dateB != null) {
+        return dateB.compareTo(dateA);
+      }
+      return b.fecha.compareTo(a.fecha);
+    });
+
+    return parsed;
   }
 }
