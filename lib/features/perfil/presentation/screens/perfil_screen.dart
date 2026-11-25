@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_cascade_transition.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
@@ -83,16 +84,9 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
-        actions: [
-          // Botón Día y Noche (Theme Switch)
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: isDark ? Colors.amberAccent : Colors.white,
-            ),
-            tooltip: isDark ? 'Cambiar a modo Día' : 'Cambiar a modo Noche',
-            onPressed: () => ref.read(themeModeProvider.notifier).toggleTheme(),
-          ),
+        actions: const [
+          // Botón Día y Noche (Theme Switch con Cascada)
+          ThemeToggleButton(),
         ],
       ),
       body: SingleChildScrollView(

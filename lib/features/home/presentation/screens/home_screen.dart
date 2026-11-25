@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_cascade_transition.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -35,15 +36,8 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Red de Salud Huánuco'),
         actions: [
-          // Botón de Modo Día y Noche
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              color: isDark ? Colors.amberAccent : Colors.white,
-            ),
-            tooltip: isDark ? 'Cambiar a modo Día' : 'Cambiar a modo Noche',
-            onPressed: () => ref.read(themeModeProvider.notifier).toggleTheme(),
-          ),
+          // Botón de Modo Día y Noche con efecto cascada
+          const ThemeToggleButton(),
           // Botón de Perfil
           IconButton(
             icon: const Icon(Icons.account_circle_rounded),
